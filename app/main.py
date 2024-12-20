@@ -16,15 +16,15 @@ class Builtins:
 
         builtin = Builtins.get(command)
         if builtin:
-            print(f"{command} is a shell builtin")
+            print(f'{command} is a shell builtin')
             return
 
         command_path = get_command_path(command)
         if command_path:
-            print(f"{command} is {command_path}")
+            print(f'{command} is {command_path}')
             return
 
-        print(f"{command}: not found")
+        print(f'{command}: not found')
 
     def _pwd(args):
         path_list = Cwd.get()
@@ -32,7 +32,11 @@ class Builtins:
         print(path_str)
 
     def _cd(args):
+        HOME = os.environ['HOME']
         input_path = args[1]
+
+        if input_path[0] == '~':
+            input_path = f'{HOME}{input_path[1:]}'
 
         if input_path == '/':
             Cwd.set([])
@@ -60,7 +64,7 @@ class Builtins:
             Cwd.set(path_list)
             return
 
-        print(f"cd: {input_path}: No such file or directory")
+        print(f'cd: {input_path}: No such file or directory')
 
     _builtins = {
         'exit': _exit,
@@ -90,7 +94,7 @@ class Cwd:
         return path_str.strip('/').split('/')
 
     def list_to_str(path_list):
-        return f"/{'/'.join(path_list)}"
+        return f'/{'/'.join(path_list)}'
 
     def init():
         path_str = os.getcwd()
@@ -103,7 +107,7 @@ def init():
 
 
 def rep():
-    sys.stdout.write("$ ")
+    sys.stdout.write('$ ')
 
     user_input = input()
     args = user_input.split()
@@ -112,7 +116,7 @@ def rep():
 
 
 def get_command_path(command):
-    PATH = os.environ["PATH"]
+    PATH = os.environ['PATH']
     path_list = PATH.split(':')
 
     for path in path_list:
@@ -136,7 +140,7 @@ def run_program(args):
         subprocess.run([command_path] + args[1:])
         return
 
-    print(f"{command}: command not found")
+    print(f'{command}: command not found')
 
 
 def main():
@@ -146,5 +150,5 @@ def main():
         rep()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
