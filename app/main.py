@@ -106,11 +106,30 @@ def init():
     Cwd.init()
 
 
+def parse_input(user_input):
+    args = []
+    current_arg = ''
+    is_inside_single_quotes = False
+
+    for c in user_input + ' ':
+        if (c == ' ' and is_inside_single_quotes) or (c != ' ' and c != '\''):
+            current_arg += c
+
+        if (c == '\'' and is_inside_single_quotes) or (c == ' ' and not is_inside_single_quotes and len(current_arg) > 0):
+            args.append(current_arg)
+            current_arg = ''
+
+        if c == '\'':
+            is_inside_single_quotes = not is_inside_single_quotes
+
+    return args
+
+
 def rep():
     sys.stdout.write('$ ')
 
     user_input = input()
-    args = user_input.split()
+    args = parse_input(user_input)
 
     run_program(args)
 
