@@ -26,10 +26,15 @@ class Builtins:
 
         print(f"{command}: not found")
 
+    def _pwd(args):
+        cwd = os.getcwd()
+        print(cwd)
+
     builtins = {
         'exit': _exit,
         'echo': _echo,
         'type': _type,
+        'pwd': _pwd
     }
 
 
