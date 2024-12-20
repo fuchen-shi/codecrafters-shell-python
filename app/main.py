@@ -108,19 +108,23 @@ def init():
 
 def parse_input(user_input):
     args = []
-    current_arg = ''
+    current_arg = None
     is_inside_single_quotes = False
 
     for c in user_input + ' ':
-        if (c == ' ' and is_inside_single_quotes) or (c != ' ' and c != '\''):
-            current_arg += c
-
-        if (c == '\'' and is_inside_single_quotes) or (c == ' ' and not is_inside_single_quotes and len(current_arg) > 0):
-            args.append(current_arg)
-            current_arg = ''
-
-        if c == '\'':
+        if c == '\'':  # Toggle single quote
+            current_arg = current_arg or ''
             is_inside_single_quotes = not is_inside_single_quotes
+            continue
+
+        if (c == ' ' and is_inside_single_quotes) or (c != ' '):  # Ordinary char
+            current_arg = current_arg or ''
+            current_arg += c
+            continue
+
+        if (current_arg is not None):  # Split args
+            args.append(current_arg)
+            current_arg = None
 
     return args
 
