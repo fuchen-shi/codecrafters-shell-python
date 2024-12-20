@@ -107,6 +107,8 @@ def init():
 
 
 def parse_input(user_input):
+    # TODO: Handle newline
+
     args = []
     current_arg = None
 
@@ -117,6 +119,8 @@ def parse_input(user_input):
     for c in user_input + ' ':
         if is_escaping:  # Escape current
             current_arg = current_arg or ''
+            if is_inside_double_quotes and c not in ['\\', '$', '"']:
+                current_arg += '\\'
             current_arg += c
             is_escaping = False
             continue
@@ -135,7 +139,7 @@ def parse_input(user_input):
             is_inside_double_quotes = not is_inside_double_quotes
             continue
 
-        if c != ' ' or (c == ' ' and (is_inside_single_quotes or is_inside_double_quotes)):  # Ordinary char
+        if c != ' ' or is_inside_single_quotes or is_inside_double_quotes:  # Ordinary char
             current_arg = current_arg or ''
             current_arg += c
             continue
