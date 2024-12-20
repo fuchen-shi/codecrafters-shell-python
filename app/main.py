@@ -14,7 +14,7 @@ class Builtins:
     def _type(args):
         command = args[1]
 
-        builtin = Builtins.builtins.get(command)
+        builtin = Builtins.get(command)
         if builtin:
             print(f"{command} is a shell builtin")
             return
@@ -27,15 +27,54 @@ class Builtins:
         print(f"{command}: not found")
 
     def _pwd(args):
-        cwd = os.getcwd()
+        cwd = Cwd.get()
         print(cwd)
 
-    builtins = {
+    def _cd(args):
+        new_dir = args[1]
+
+        if os.path.isdir(new_dir):
+            Cwd.set(new_dir)
+            return
+
+        print(f"cd: {new_dir}: No such file or directory")
+
+    _builtins = {
         'exit': _exit,
         'echo': _echo,
         'type': _type,
-        'pwd': _pwd
+        'pwd': _pwd,
+        'cd': _cd
     }
+
+    def get(command):
+        return Builtins._builtins.get(command)
+
+
+class Cwd:
+    _cwd = None
+
+    def init():
+        Cwd._cwd = os.getcwd()
+
+    def get():
+        return Cwd._cwd
+
+    def set(new_dir):
+        Cwd._cwd = new_dir
+
+
+def init():
+    Cwd.init()
+
+
+def rep():
+    sys.stdout.write("$ ")
+
+    user_input = input()
+    args = user_input.split()
+
+    run_program(args)
 
 
 def get_command_path(command):
@@ -53,7 +92,7 @@ def get_command_path(command):
 def run_program(args):
     command = args[0]
 
-    builtin = Builtins.builtins.get(command)
+    builtin = Builtins.get(command)
     if builtin:
         builtin(args)
         return
@@ -67,13 +106,10 @@ def run_program(args):
 
 
 def main():
+    init()
+
     while True:
-        sys.stdout.write("$ ")
-
-        user_input = input()
-        args = user_input.split()
-
-        run_program(args)
+        rep()
 
 
 if __name__ == "__main__":
