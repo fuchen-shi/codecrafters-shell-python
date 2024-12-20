@@ -27,17 +27,40 @@ class Builtins:
         print(f"{command}: not found")
 
     def _pwd(args):
-        cwd = Cwd.get()
-        print(cwd)
+        path_list = Cwd.get()
+        path_str = Cwd.list_to_str(path_list)
+        print(path_str)
 
     def _cd(args):
-        new_dir = args[1]
+        input_path = args[1]
 
-        if os.path.isdir(new_dir):
-            Cwd.set(new_dir)
+        if input_path == '/':
+            Cwd.set([])
             return
 
-        print(f"cd: {new_dir}: No such file or directory")
+        path_list = []
+
+        if input_path[0] != '/':  # Relative path
+            path_list = Cwd.get()
+
+        steps = input_path.strip('/').split('/')
+
+        for step in steps:
+            match step:
+                case '.':
+                    pass
+                case '..':
+                    path_list = path_list[:-1]
+                case _:
+                    path_list.append(step)
+
+        path_str = Cwd.list_to_str(path_list)
+
+        if os.path.isdir(path_str):
+            Cwd.set(path_list)
+            return
+
+        print(f"cd: {input_path}: No such file or directory")
 
     _builtins = {
         'exit': _exit,
@@ -52,16 +75,27 @@ class Builtins:
 
 
 class Cwd:
-    _cwd = None
-
-    def init():
-        Cwd._cwd = os.getcwd()
+    _path_list = []
 
     def get():
-        return Cwd._cwd
+        return Cwd._path_list.copy()
 
-    def set(new_dir):
-        Cwd._cwd = new_dir
+    def set(path_list):
+        Cwd._path_list = path_list
+
+    def str_to_list(path_str):
+        if path_str == '/':
+            return []
+
+        return path_str.strip('/').split('/')
+
+    def list_to_str(path_list):
+        return f"/{'/'.join(path_list)}"
+
+    def init():
+        path_str = os.getcwd()
+        path_list = Cwd.str_to_list(path_str)
+        Cwd.set(path_list)
 
 
 def init():
