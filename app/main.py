@@ -1,6 +1,17 @@
 import sys
 import os
+import subprocess
 from pathlib import PurePath
+
+
+def get_command_path(command):
+    path_env = os.environ["PATH"]
+    path_list = path_env.split(':')
+    for path in path_list:
+        command_path = PurePath(path, command).as_posix()
+        if os.path.isfile(command_path):
+            return command_path
+    return None
 
 
 class Builtins:
@@ -17,13 +28,10 @@ class Builtins:
             print(f"{command} is a shell builtin")
             return
         
-        path_env = os.environ["PATH"]
-        path_list = path_env.split(':')
-        for path in path_list:
-            command_path = PurePath(path, command).as_posix()
-            if os.path.isfile(command_path):
-                print(f"{command} is {command_path}")
-                return
+        command_path = get_command_path(command)
+        if command_path:
+            print(f"{command} is {command_path}")
+            return
 
         print(f"{command}: not found")
 
@@ -39,16 +47,30 @@ def handle_not_found(args):
     print(f"{command}: command not found")
 
 
+def run_program(args):
+    command = args[0]
+
+    if command in Builtins.builtins:
+        program = Builtins.builtins[command]
+        program(args)
+        return
+    
+    command_path = get_command_path(command)
+    if command_path:
+        subprocess.run([command_path] + args[1:])
+        return
+    
+    handle_not_found(args)
+
+
 def main():
     while True:
         sys.stdout.write("$ ")
 
         user_input = input()
         args = user_input.split()
-        command = args[0]
-
-        program = Builtins.builtins.get(command, handle_not_found)
-        program(args)
+        
+        run_program(args)
 
 
 if __name__ == "__main__":
