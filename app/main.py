@@ -109,20 +109,38 @@ def init():
 def parse_input(user_input):
     args = []
     current_arg = None
+
+    is_escaping = False
     is_inside_single_quotes = False
+    is_inside_double_quotes = False
 
     for c in user_input + ' ':
-        if c == '\'':  # Toggle single quote
+        if is_escaping:  # Escape current
+            current_arg = current_arg or ''
+            current_arg += c
+            is_escaping = False
+            continue
+
+        if c == '\\' and not is_inside_single_quotes:  # Escape next
+            is_escaping = True
+            continue
+
+        if c == '\'' and not is_inside_double_quotes:  # Toggle single quote
             current_arg = current_arg or ''
             is_inside_single_quotes = not is_inside_single_quotes
             continue
 
-        if (c == ' ' and is_inside_single_quotes) or (c != ' '):  # Ordinary char
+        if c == '"' and not is_inside_single_quotes:  # Toggle double quote
+            current_arg = current_arg or ''
+            is_inside_double_quotes = not is_inside_double_quotes
+            continue
+
+        if c != ' ' or (c == ' ' and (is_inside_single_quotes or is_inside_double_quotes)):  # Ordinary char
             current_arg = current_arg or ''
             current_arg += c
             continue
 
-        if (current_arg is not None):  # Split args
+        if current_arg is not None:  # Split args
             args.append(current_arg)
             current_arg = None
 
