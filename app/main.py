@@ -1,4 +1,6 @@
 import sys
+import os
+from pathlib import PurePath
 
 
 class Builtins:
@@ -10,10 +12,20 @@ class Builtins:
 
     def _type(args):
         command = args[1]
+
         if command in Builtins.builtins:
             print(f"{command} is a shell builtin")
-        else:
-            print(f"{command}: not found")
+            return
+        
+        path_env = os.environ["PATH"]
+        path_list = path_env.split(':')
+        for path in path_list:
+            command_path = PurePath(path, command).as_posix()
+            if os.path.isfile(command_path):
+                print(f"{command} is {command_path}")
+                return
+
+        print(f"{command}: not found")
 
     builtins = {
         'exit': _exit,
